@@ -22,6 +22,7 @@ func main() {
 	router.POST("/signup", controllers.SignUpController)
 	router.POST("/signin", controllers.SignInController)
 	router.POST("/add", controllers.AddPostController)
+	router.POST("/newsite", controllers.AddNewSiteController)
 
 	router.Run()
 }

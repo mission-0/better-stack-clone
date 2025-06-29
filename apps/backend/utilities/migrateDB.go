@@ -7,7 +7,7 @@ import (
 )
 
 func MigrateDB() {
-	err := DB.AutoMigrate(&models.User{})
+	err := DB.AutoMigrate(&models.User{}, &models.Website{})
 	fmt.Println("error while migration", err)
 	if err != nil {
 		fmt.Println("Not migrated")
