@@ -18,6 +18,15 @@ func AddNewSiteController(ctx *gin.Context) {
 		})
 	}
 
+	ok := models.IsValidRegion(newSite.Regions)
+
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "please enter a valid Region",
+		})
+		return
+	}
+
 	registerNewSite := models.Website{Regions: newSite.Regions, UserId: newSite.UserId, Url: newSite.Url}
 
 	res := utilities.DB.Create(&registerNewSite)

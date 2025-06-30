@@ -16,7 +16,7 @@ type User struct {
 type Website struct {
 	Id      uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 	Url     string     `json:"url"`
-	Regions RegionList `json:"regions" gorm:"type:RegionList"`
+	Regions RegionList `json:"regions"`
 	UserId  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId"`
 	User    User       `gorm:"foreignKey:UserId;references:Id" json:"user"`
 }
@@ -29,3 +29,15 @@ const (
 	North_America RegionList = "North America"
 	Middle_East   RegionList = "Middle East"
 )
+
+var allowedRegions = map[RegionList]bool{
+	Asia:          true,
+	Europe:        true,
+	North_America: true,
+	Middle_East:   true,
+}
+
+func IsValidRegion(r RegionList) bool {
+	_, ok := allowedRegions[r]
+	return ok
+}

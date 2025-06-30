@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 	"golang.org/x/crypto/bcrypt"
@@ -18,10 +19,10 @@ func checkUserPasswordWithHash(hashedPassword, userPassword string) bool {
 	return err == nil
 }
 
-func createToken(email string) (string, error) {
+func createToken(userId uuid.UUID) (string, error) {
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": email,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"Id":  userId,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	signedToken, err := unsignedToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
@@ -38,7 +39,7 @@ func SignInController(ctx *gin.Context) {
 	ctx.ShouldBindJSON(&user)
 
 	newUser := models.User{
-		Email: user.Email,
+		Id: user.Id,
 	}
 
 	//	fmt.Println("user obj", newUser)
@@ -62,7 +63,7 @@ func SignInController(ctx *gin.Context) {
 
 	}
 
-	jwtToken, err := createToken(newUser.Email)
+	jwtToken, err := createToken(newUser.Id)
 	if err != nil {
 		fmt.Println("JWt err", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
