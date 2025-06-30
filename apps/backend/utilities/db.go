@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,6 +27,14 @@ func ConnectToDb() {
 
 	DB, _ = gorm.Open(postgres.Open(db_url), &gorm.Config{})
 
+	db, err := DB.DB()
+	if err != nil {
+		log.Fatal("Db spon error")
+	}
+
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(100)
+	db.SetConnMaxLifetime(time.Hour)
 	fmt.Print("Db", DB)
 	if err != nil {
 		println("db connection error")
