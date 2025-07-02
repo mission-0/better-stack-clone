@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mission-0/better-stack-backend/dto"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 	"golang.org/x/crypto/bcrypt"
@@ -12,19 +13,38 @@ import (
 
 func hashPassword(simplePassword string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(simplePassword), 14)
-	// note that the 14 written in the above GenerateFromPassword function is nothing but salts round
 	return string(bytes), err
 }
 
 func SignUpController(ctx *gin.Context) {
+
+	var input map[string]interface{}
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusNotAcceptable, gin.H{
+			"message": "Invalid JSON",
+		})
+		return
+	}
+
+	result := dto.SignupSchema.Parse(input, &models.SignupValidation{})
+	if len(result) > 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Validation failed",
+			"errors":  result,
+		})
+		return
+	}
+
 	var user models.User
 
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		fmt.Println("Json Bind Failed")
-		ctx.JSON(http.StatusNotAcceptable, gin.H{
-			"message": "Json Bind Failed",
-		})
+	user.Name = input["name"].(string)
+	user.Email = input["email"].(string)
+	user.Password = input["password"].(string)
+	if Fullname, ok := input["Fullname"].(string); ok {
+		user.FullName = Fullname
 	}
+
 	hashedPassword, err := hashPassword(user.Password)
 	if err != nil {
 		fmt.Println("something went wrong while hashing password ")
@@ -33,6 +53,7 @@ func SignUpController(ctx *gin.Context) {
 		})
 		return
 	}
+
 	registerNewUser := models.User{Name: user.Name, Email: user.Email, Password: hashedPassword, FullName: user.FullName}
 	res := utilities.DB.Create(&registerNewUser)
 
