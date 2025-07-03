@@ -18,31 +18,24 @@ func hashPassword(simplePassword string) (string, error) {
 
 func SignUpController(ctx *gin.Context) {
 
-	var input map[string]interface{}
+	var user dto.UserInput
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusNotAcceptable, gin.H{
 			"message": "Invalid JSON",
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	result := dto.SignupSchema.Parse(input, &models.User{})
-	if len(result) > 0 {
+	validate := utilities.NewValidator()
+
+	if err := validate.Struct(user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Validation failed",
-			"errors":  result,
+			"message": "Validation Failed",
+			"errors":  utilities.FormatValidationErrors(err),
 		})
 		return
-	}
-
-	var user models.User
-
-	user.Name = input["name"].(string)
-	user.Email = input["email"].(string)
-	user.Password = input["password"].(string)
-	if Fullname, ok := input["Fullname"].(string); ok {
-		user.Fullname = Fullname
 	}
 
 	hashedPassword, err := hashPassword(user.Password)

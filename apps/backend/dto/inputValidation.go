@@ -1,20 +1,19 @@
 package dto
 
 import (
-	z "github.com/Oudwins/zog"
+	"github.com/google/uuid"
+	"github.com/mission-0/better-stack-backend/models"
 )
 
-var SignupSchema = z.Struct(
-	z.Shape{
-		"name":     z.String().Min(3, z.Message("Name must contain minimum 3 characters")).Max(10, z.Message("Name must contain maximum 10 characters")).Required(),
-		"email":    z.String().Email().Required(z.Message("Email is required")),
-		"password": z.String().Min(8, z.Message("Password should be of atleast 8 characaters")).Max(16, z.Message("Password should be of atmost 16 characters")).Required(),
-		"fullname": z.String(),
-	},
-)
+type WebsiteInput struct {
+	Url     string            `json:"url" validate:"required,url"`
+	Regions models.RegionList `json:"regions" validate:"required,validregion"`
+	UserId  uuid.UUID         `json:"userId" validate:"required"`
+}
 
-var WebSiteSchema = z.Struct(
-	z.Shape{
-		"url": z.String().URL().Required(),
-	},
-)
+type UserInput struct {
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+	Fullname string `json:"fullname" validate:"omitempty"`
+}
