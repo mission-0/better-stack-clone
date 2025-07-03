@@ -27,7 +27,7 @@ func SignUpController(ctx *gin.Context) {
 		return
 	}
 
-	result := dto.SignupSchema.Parse(input, &models.SignupValidation{})
+	result := dto.SignupSchema.Parse(input, &models.User{})
 	if len(result) > 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Validation failed",
@@ -42,7 +42,7 @@ func SignUpController(ctx *gin.Context) {
 	user.Email = input["email"].(string)
 	user.Password = input["password"].(string)
 	if Fullname, ok := input["Fullname"].(string); ok {
-		user.FullName = Fullname
+		user.Fullname = Fullname
 	}
 
 	hashedPassword, err := hashPassword(user.Password)
@@ -54,7 +54,7 @@ func SignUpController(ctx *gin.Context) {
 		return
 	}
 
-	registerNewUser := models.User{Name: user.Name, Email: user.Email, Password: hashedPassword, FullName: user.FullName}
+	registerNewUser := models.User{Name: user.Name, Email: user.Email, Password: hashedPassword, Fullname: user.Fullname}
 	res := utilities.DB.Create(&registerNewUser)
 
 	if res.Error != nil {
