@@ -5,18 +5,33 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mission-0/better-stack-backend/dto"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 )
 
 func AddNewSiteController(ctx *gin.Context) {
-	var newSite models.Website
-	if err := ctx.ShouldBindJSON(&newSite); err != nil {
-		fmt.Println("Json Bind Failed")
+
+	var input map[string]interface{}
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusNotAcceptable, gin.H{
-			"message": "Json Bind Failed",
+			"message": "Invalid JSON",
+		})
+		return
+	}
+
+	result := dto.WebSiteSchema.Parse(input, &models.Website{})
+
+	if len(result) > 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Validation failed",
+			"errors":  result,
 		})
 	}
+
+	var newSite models.Website
+	newSite.Url = input["url"].(string)
 
 	ok := models.IsValidRegion(newSite.Regions)
 

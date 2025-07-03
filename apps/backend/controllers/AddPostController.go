@@ -12,7 +12,7 @@ func init() {
 	utilities.ConnectToDb()
 }
 func AddPostController(ctx *gin.Context) {
-	user := models.User{Name: "shishu", Email: "hii@hello.com", Password: "test", FullName: "shishu"}
+	user := models.User{Name: "shishu", Email: "hii@hello.com", Password: "test", Fullname: "shishu"}
 
 	fmt.Println("user ", &user)
 	result := utilities.DB.Create(&user)
