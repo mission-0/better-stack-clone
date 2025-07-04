@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mission-0/better-stack-backend/dto"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +17,7 @@ func hashPassword(simplePassword string) (string, error) {
 
 func SignUpController(ctx *gin.Context) {
 
-	var user dto.UserInput
+	var user models.User
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusNotAcceptable, gin.H{
@@ -47,7 +46,7 @@ func SignUpController(ctx *gin.Context) {
 		return
 	}
 
-	registerNewUser := models.User{Name: user.Name, Email: user.Email, Password: hashedPassword, Fullname: user.Fullname}
+	registerNewUser := models.User{Email: user.Email, Password: hashedPassword, Fullname: user.Fullname}
 	res := utilities.DB.Create(&registerNewUser)
 
 	if res.Error != nil {

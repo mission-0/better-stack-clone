@@ -42,9 +42,6 @@ func SignInController(ctx *gin.Context) {
 		Id: user.Id,
 	}
 
-	//	fmt.Println("user obj", newUser)
-	//	fmt.Println("password ", user.Password)
-	//	fmt.Println("hashed", string(newUser.Password))
 	result := utilities.DB.First(&newUser)
 
 	if result.Error != nil {

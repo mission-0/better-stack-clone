@@ -5,16 +5,15 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mission-0/better-stack-backend/dto"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 )
 
 func AddNewSiteController(ctx *gin.Context) {
 
-	var input dto.WebsiteInput
+	var newSite models.Website
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	if err := ctx.ShouldBindJSON(&newSite); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid JSON format",
 			"error":   err.Error(),
@@ -24,7 +23,7 @@ func AddNewSiteController(ctx *gin.Context) {
 
 	validate := utilities.NewValidator()
 
-	if err := validate.Struct(input); err != nil {
+	if err := validate.Struct(newSite); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Validation failed",
 			"errors":  utilities.FormatValidationErrors(err),
@@ -33,9 +32,9 @@ func AddNewSiteController(ctx *gin.Context) {
 	}
 
 	registerNewSite := models.Website{
-		Url:     input.Url,
-		Regions: input.Regions,
-		UserId:  input.UserId,
+		Url:     newSite.Url,
+		Regions: newSite.Regions,
+		UserId:  newSite.UserId,
 	}
 
 	res := utilities.DB.Create(&registerNewSite)
