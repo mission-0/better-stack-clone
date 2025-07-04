@@ -1,61 +1,59 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mission-0/better-stack-backend/dto"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 )
 
 func AddNewSiteController(ctx *gin.Context) {
 
-	var input map[string]interface{}
+	var newSite models.Website
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusNotAcceptable, gin.H{
-			"message": "Invalid JSON",
+	if err := ctx.ShouldBindJSON(&newSite); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid JSON format",
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	result := dto.WebSiteSchema.Parse(input, &models.Website{})
+	validate := utilities.NewValidator()
 
-	if len(result) > 0 {
+	if err := validate.Struct(newSite); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Validation failed",
-			"errors":  result,
-		})
-	}
-
-	var newSite models.Website
-	newSite.Url = input["url"].(string)
-
-	ok := models.IsValidRegion(newSite.Regions)
-
-	if !ok {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "please enter a valid Region",
+			"errors":  utilities.FormatValidationErrors(err),
 		})
 		return
 	}
 
-	registerNewSite := models.Website{Regions: newSite.Regions, UserId: newSite.UserId, Url: newSite.Url}
+	registerNewSite := models.Website{
+		Url:     newSite.Url,
+		Regions: newSite.Regions,
+		UserId:  newSite.UserId,
+	}
 
 	res := utilities.DB.Create(&registerNewSite)
-
 	if res.Error != nil {
-		fmt.Println("Error inserting idea")
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"messagee": "Error inserting data to Website field in db ",
-			"err":      res.Error,
-		})
+		if strings.Contains(res.Error.Error(), "foreign key") {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid UserId: user does not exist",
+				"error":   res.Error.Error(),
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to create website",
+				"error":   res.Error.Error(),
+			})
+		}
 		return
 	}
 
-	ctx.JSON((http.StatusAccepted), gin.H{
-		"messagee": "dataInserted",
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "Website added successfully",
 	})
 }
