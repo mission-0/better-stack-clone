@@ -12,7 +12,7 @@ import (
 
 func AddNewSiteController(ctx *gin.Context) {
 	var newSite models.Website
-	var userId uuid.UUID
+	var userID uuid.UUID
 	var err error
 
 	if err := ctx.ShouldBindJSON(&newSite); err != nil {
@@ -33,7 +33,7 @@ func AddNewSiteController(ctx *gin.Context) {
 		return
 	}
 
-	userIdInterface, isOk := ctx.Get("userId")
+	userIDInterface, isOk := ctx.Get("userId")
 	if !isOk {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "User not authenticated",
@@ -42,8 +42,8 @@ func AddNewSiteController(ctx *gin.Context) {
 
 	// userId from the jwt might be a string to parsing it to uuid
 
-	if userIdStr, ok := userIdInterface.(string); ok {
-		userId, err = uuid.Parse(userIdStr)
+	if userIDStr, ok := userIDInterface.(string); ok {
+		userID, err = uuid.Parse(userIDStr)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"message": "UserId format is not valid",
@@ -60,7 +60,7 @@ func AddNewSiteController(ctx *gin.Context) {
 	registerNewSite := models.Website{
 		Url:     newSite.Url,
 		Regions: newSite.Regions,
-		UserId:  userId,
+		UserId:  userID,
 	}
 
 	res := utilities.DB.Create(&registerNewSite)

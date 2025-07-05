@@ -22,7 +22,7 @@ func main() {
 	router.GET("/health", middlewares.Usermiddleware(), controllers.HealthCheckup)
 	router.POST("/signup", controllers.SignUpController)
 	router.POST("/signin", controllers.SignInController)
-	router.POST("/add", controllers.AddPostController)
+	router.GET("/mysites", middlewares.Usermiddleware(), controllers.AllSites)
 	router.POST("/newsite", middlewares.Usermiddleware(), controllers.AddNewSiteController)
 
 	router.Run()
