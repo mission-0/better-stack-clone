@@ -16,7 +16,7 @@ type Website struct {
 	Id      uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 	Url     string     `json:"url" validate:"required,url"`
 	Regions RegionList `json:"regions" validate:"required,validregion"`
-	UserId  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"required"`
+	UserId  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
 	User    User       `gorm:"foreignKey:UserId;references:Id" json:"user" validate:"-"`
 }
 

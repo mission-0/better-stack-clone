@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mission-0/better-stack-backend/controllers"
+	"github.com/mission-0/better-stack-backend/middlewares"
 	utilities "github.com/mission-0/better-stack-backend/utilities"
 )
 
@@ -18,11 +19,11 @@ func init() {
 func main() {
 	fmt.Println("Hello from go lang backend")
 	router := gin.Default()
-	router.GET("/health", controllers.HealthCheckup)
+	router.GET("/health", middlewares.Usermiddleware(), controllers.HealthCheckup)
 	router.POST("/signup", controllers.SignUpController)
 	router.POST("/signin", controllers.SignInController)
 	router.POST("/add", controllers.AddPostController)
-	router.POST("/newsite", controllers.AddNewSiteController)
+	router.POST("/newsite", middlewares.Usermiddleware(), controllers.AddNewSiteController)
 
 	router.Run()
 }

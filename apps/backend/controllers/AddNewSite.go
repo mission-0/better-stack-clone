@@ -5,13 +5,15 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/mission-0/better-stack-backend/models"
 	"github.com/mission-0/better-stack-backend/utilities"
 )
 
 func AddNewSiteController(ctx *gin.Context) {
-
 	var newSite models.Website
+	var userId uuid.UUID
+	var err error
 
 	if err := ctx.ShouldBindJSON(&newSite); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -31,10 +33,34 @@ func AddNewSiteController(ctx *gin.Context) {
 		return
 	}
 
+	userIdInterface, isOk := ctx.Get("userId")
+	if !isOk {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User not authenticated",
+		})
+	}
+
+	// userId from the jwt might be a string to parsing it to uuid
+
+	if userIdStr, ok := userIdInterface.(string); ok {
+		userId, err = uuid.Parse(userIdStr)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "UserId format is not valid",
+			})
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Invalid User type",
+		})
+		return
+	}
+
 	registerNewSite := models.Website{
 		Url:     newSite.Url,
 		Regions: newSite.Regions,
-		UserId:  newSite.UserId,
+		UserId:  userId,
 	}
 
 	res := utilities.DB.Create(&registerNewSite)
