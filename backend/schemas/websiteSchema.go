@@ -1,4 +1,0 @@
-package schemas
-
-func WebsiteSchema() {
-}

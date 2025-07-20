@@ -1,11 +1,13 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
 type User struct {
-	Id       uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4();unique"`
+	ID       uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4();unique"`
 	Email    string    `json:"email" gorm:"unique;notNull" validate:"required,email"`
 	Password string    `json:"password" validate:"required,min=8,max=16"`
 	Fullname string    `json:"fullname" validate:"required"`
@@ -13,27 +15,35 @@ type User struct {
 }
 
 type Website struct {
-	Id      uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Url     string     `json:"url" validate:"required,url"`
+	ID      uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	URL     string     `json:"url" validate:"required,url"`
 	Regions RegionList `json:"regions" validate:"required,validregion"`
-	UserId  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
+	UserID  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
 	User    User       `gorm:"foreignKey:UserId;references:Id" json:"user" validate:"-"`
+	Logs    []Logs     `gorm:"foreignKey:LogsId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"logs"`
+}
+
+type Logs struct {
+	ID     uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	LogsID uuid.UUID `gorm:"type:uuid;notNull;index" json:"logsId" validate:"-"`
+	Logs   string    `json:"logs" validate:"required,logs"`
+	time   time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
 }
 
 type RegionList string
 
 const (
-	Asia          RegionList = "Asia"
-	Europe        RegionList = "Europe"
-	North_America RegionList = "North America"
-	Middle_East   RegionList = "Middle East"
+	Asia         RegionList = "Asia"
+	Europe       RegionList = "Europe"
+	NorthAmerica RegionList = "North America"
+	MiddleEast   RegionList = "Middle East"
 )
 
 var allowedRegions = map[RegionList]bool{
-	Asia:          true,
-	Europe:        true,
-	North_America: true,
-	Middle_East:   true,
+	Asia:         true,
+	Europe:       true,
+	NorthAmerica: true,
+	MiddleEast:   true,
 }
 
 func IsValidRegion(r RegionList) bool {
