@@ -11,7 +11,7 @@ type User struct {
 	Email    string    `json:"email" gorm:"unique;notNull" validate:"required,email"`
 	Password string    `json:"password" validate:"required,min=8,max=16"`
 	Fullname string    `json:"fullname" validate:"required"`
-	Website  []Website `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"website"`
+	Website  []Website `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"website"`
 }
 
 type Website struct {
@@ -19,15 +19,17 @@ type Website struct {
 	URL     string     `json:"url" validate:"required,url"`
 	Regions RegionList `json:"regions" validate:"required,validregion"`
 	UserID  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
-	User    User       `gorm:"foreignKey:UserId;references:Id" json:"user" validate:"-"`
-	Logs    []Logs     `gorm:"foreignKey:LogsId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"logs"`
+	User    User       `gorm:"foreignKey:UserID;references:ID" json:"user" validate:"-"`
+	Logs    []Logs     `gorm:"foreignKey:WebsiteID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"logs"`
 }
 
 type Logs struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	LogsID uuid.UUID `gorm:"type:uuid;notNull;index" json:"logsId" validate:"-"`
-	Logs   string    `json:"logs" validate:"required,logs"`
-	time   time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	Latency   string    `json:"latency"`
+	WebsiteID uuid.UUID `gorm:"type:uuid;notNull;index" json:"websiteID" validate:"-"`
+	Website   Website   `gorm:"foreignKey:WebsiteID;references:ID" json:"website" validate:"-"`
+	Logs      string    `json:"logs" validate:"required,logs"`
+	Time      time.Time
 }
 
 type RegionList string

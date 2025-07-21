@@ -39,7 +39,7 @@ func SignInController(ctx *gin.Context) {
 	ctx.ShouldBindJSON(&user)
 
 	newUser := models.User{
-		Id: user.Id,
+		ID: user.ID,
 	}
 
 	result := utilities.DB.First(&newUser)
@@ -60,7 +60,7 @@ func SignInController(ctx *gin.Context) {
 
 	}
 
-	jwtToken, err := createToken(newUser.Id)
+	jwtToken, err := createToken(newUser.ID)
 	if err != nil {
 		fmt.Println("JWt err", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{

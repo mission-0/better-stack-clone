@@ -16,7 +16,6 @@ func hashPassword(simplePassword string) (string, error) {
 }
 
 func SignUpController(ctx *gin.Context) {
-
 	var user models.User
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -52,6 +51,7 @@ func SignUpController(ctx *gin.Context) {
 	if res.Error != nil {
 		ctx.JSON(http.StatusConflict, gin.H{
 			"message": "email might already exists",
+			"error":   res.Error,
 		})
 		return
 	}
