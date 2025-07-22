@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -54,25 +55,23 @@ func AddSiteLogs(ctx *gin.Context) {
 	}
 
 	fmt.Println("Calling fns for logs...")
-	//calling fn for logs
-	latency, status, err := pingsites.GetLatency("https://jsonplaceholder.typicode.com/todos/") // TODO: Replace the hardcoded url with the url from the backend urls
-	if err != nil {
-		fmt.Println("error come")
-	}
-	fmt.Println("status", status)
-
 	response := utilities.DB.Where("user_id = ?", userID).Find(&websites)
+
 	if response.Error != nil {
-		fmt.Println("Find query fails")
+		log.Fatal("Find query fails with error ", response.Error)
 	}
-
-	fmt.Println("response from query", websites)
-	fmt.Printf("type of latency is %T\n", latency)
-	fmt.Println("latency", latency)
-
-	// this forloop let you add multiple websites log to the backend
 
 	for index := 0; index < len(websites); index++ {
+		//calling fn for logs
+		latency, status, err := pingsites.GetLatency(websites[index].URL)
+		if err != nil {
+			fmt.Println("error come")
+		}
+		// fmt.Println("status", status)
+
+		fmt.Println("response from query url", websites[index].URL)
+		fmt.Printf("type of latency is %T\n", latency)
+		fmt.Println("latency", latency)
 
 		newWebsiteLogs := models.Logs{
 			Logs:      status,
