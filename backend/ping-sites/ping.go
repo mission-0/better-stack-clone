@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-func GetLatency(url string) (time.Duration, string, error) {
+func GetLatency(url string) (string, string, error) {
 
 	fmt.Println("sending get request.......")
 	startTime := time.Now()
 	response, err := http.Get(url)
 	ping := time.Since(startTime)
 	if err != nil {
-		return ping, response.Status, err
+		return ping.String(), response.Status, err
 	}
 
 	fmt.Println("time taken: ", ping)
 	defer response.Body.Close()
 
 	//	return string(readableString), nil
-	return ping, response.Status, nil
+	return ping.String(), response.Status, nil
 }

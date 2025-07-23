@@ -14,6 +14,13 @@ import (
 	"github.com/mission-0/better-stack-backend/utilities"
 )
 
+type logResult struct {
+	latency string
+	status  string
+	err     error
+	website models.Website
+}
+
 func AddSiteLogs(ctx *gin.Context) {
 	var websiteLogs models.Logs
 	var websites []models.Website
@@ -61,22 +68,37 @@ func AddSiteLogs(ctx *gin.Context) {
 		log.Fatal("Find query fails with error ", response.Error)
 	}
 
-	for index := 0; index < len(websites); index++ {
-		//calling fn for logs
-		latency, status, err := pingsites.GetLatency(websites[index].URL)
-		if err != nil {
-			fmt.Println("error come")
-		}
-		// fmt.Println("status", status)
+	/// channels and go routines
 
-		fmt.Println("response from query url", websites[index].URL)
-		fmt.Printf("type of latency is %T\n", latency)
-		fmt.Println("latency", latency)
+	resultOfChannels := make(chan logResult, len(websites))
+
+	for _, website := range websites {
+		go func(w models.Website) {
+
+			latency, status, err := pingsites.GetLatency(w.URL)
+			resultOfChannels <- logResult{
+				latency: latency,
+				status:  status,
+				err:     err,
+				website: w,
+			}
+
+		}(website)
+	}
+
+	var anyError bool
+	for i := 0; i < len(websites); i++ {
+		resChan := <-resultOfChannels
+		if resChan.err != nil {
+			fmt.Println("Error pinging site:", resChan.website.URL, resChan.err)
+			anyError = true
+			continue
+		}
 
 		newWebsiteLogs := models.Logs{
-			Logs:      status,
-			WebsiteID: websites[index].ID,
-			Latency:   latency.String(),
+			Logs:      resChan.status,
+			WebsiteID: resChan.website.ID,
+			Latency:   resChan.latency,
 			Time:      time.Now(),
 		}
 		res := utilities.DB.Create(&newWebsiteLogs)
@@ -98,8 +120,14 @@ func AddSiteLogs(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusAccepted, gin.H{
-			"message": "Site logs added",
-		})
+		if anyError {
+			ctx.JSON(http.StatusAccepted, gin.H{
+				"message": "Site logs added with some errors",
+			})
+		} else {
+			ctx.JSON(http.StatusAccepted, gin.H{
+				"message": "Site logs added",
+			})
+		}
 	}
 }
