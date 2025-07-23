@@ -17,7 +17,7 @@ import (
 type logResult struct {
 	latency string
 	status  string
-	err     error
+	err     string
 	website models.Website
 }
 
@@ -87,18 +87,20 @@ func AddSiteLogs(ctx *gin.Context) {
 	}
 
 	var anyError bool
+
 	for i := 0; i < len(websites); i++ {
 		resChan := <-resultOfChannels
-		if resChan.err != nil {
+		if resChan.err != " " {
 			fmt.Println("Error pinging site:", resChan.website.URL, resChan.err)
 			anyError = true
-			continue
+			// continue
 		}
 
 		newWebsiteLogs := models.Logs{
 			Logs:      resChan.status,
 			WebsiteID: resChan.website.ID,
 			Latency:   resChan.latency,
+			Error:     resChan.err,
 			Time:      time.Now(),
 		}
 		res := utilities.DB.Create(&newWebsiteLogs)

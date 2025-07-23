@@ -29,6 +29,7 @@ type Logs struct {
 	WebsiteID uuid.UUID `gorm:"type:uuid;notNull;index" json:"websiteID" validate:"-"`
 	Website   Website   `gorm:"foreignKey:WebsiteID;references:ID" json:"website" validate:"-"`
 	Logs      string    `json:"logs" validate:"required,logs"`
+	Error     string     `json:"err" validate:"-"`
 	Time      time.Time
 }
 
