@@ -15,12 +15,13 @@ type User struct {
 }
 
 type Website struct {
-	ID      uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	URL     string     `json:"url" validate:"required,url"`
-	Regions RegionList `json:"regions" validate:"required,validregion"`
-	UserID  uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
-	User    User       `gorm:"foreignKey:UserID;references:ID" json:"user" validate:"-"`
-	Logs    []Logs     `gorm:"foreignKey:WebsiteID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"logs"`
+	ID           uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	URL          string     `json:"url" validate:"required,url"`
+	Regions      RegionList `json:"regions" validate:"required,validregion"`
+	UserID       uuid.UUID  `gorm:"type:uuid;notNull;index" json:"userId" validate:"-"`
+	User         User       `gorm:"foreignKey:UserID;references:ID" json:"user" validate:"-"`
+	PingInterval int        `json:"interval" validate:"required,interval"`
+	Logs         []Logs     `gorm:"foreignKey:WebsiteID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"logs"`
 }
 
 type Logs struct {
@@ -29,7 +30,7 @@ type Logs struct {
 	WebsiteID uuid.UUID `gorm:"type:uuid;notNull;index" json:"websiteID" validate:"-"`
 	Website   Website   `gorm:"foreignKey:WebsiteID;references:ID" json:"website" validate:"-"`
 	Logs      string    `json:"logs" validate:"required,logs"`
-	Error     string     `json:"err" validate:"-"`
+	Error     string    `json:"err" validate:"-"`
 	Time      time.Time
 }
 

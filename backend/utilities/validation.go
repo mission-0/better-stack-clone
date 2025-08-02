@@ -10,6 +10,7 @@ import (
 var validationMessages = map[string]string{
 	"required":    "%s is required",
 	"email":       "%s must be a valid email address",
+	"interval":    "Interval is must",
 	"url":         "%s must be a valid URL",
 	"validregion": "%s must be a valid region (Asia, Europe, North America, Middle East)",
 	"min":         "%s must be at least %s characters long",

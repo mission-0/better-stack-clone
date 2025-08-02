@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -62,7 +63,7 @@ func AddSiteLogs(ctx *gin.Context) {
 	}
 
 	fmt.Println("Calling fns for logs...")
-	response := utilities.DB.Where("user_id = ?", userID).Find(&websites)
+	response := utilities.DB.Preload("User").Where("user_id = ?", userID).Find(&websites)
 
 	if response.Error != nil {
 		log.Fatal("Find query fails with error ", response.Error)
@@ -72,9 +73,21 @@ func AddSiteLogs(ctx *gin.Context) {
 
 	resultOfChannels := make(chan logResult, len(websites))
 
+	//serialising websites to valid json format before storing or Redis
+	jsonSerialisation, jsonErr := json.Marshal(websites)
+	if jsonErr != nil {
+		fmt.Println("error serialising json")
+
+	}
+
 	for _, website := range websites {
 		go func(w models.Website) {
 
+			fmt.Println("website before marshelling", website.User)
+
+			redisErr := utilities.RedisClient.Set(utilities.RedisContext, "websites"+"-"+w.User.Email, jsonSerialisation, 0)
+
+			fmt.Println("rediserr:", redisErr)
 			latency, status, err := pingsites.GetLatency(w.URL)
 			resultOfChannels <- logResult{
 				latency: latency,
@@ -86,13 +99,13 @@ func AddSiteLogs(ctx *gin.Context) {
 		}(website)
 	}
 
-	var anyError bool
+	// var anyError bool
 
 	for i := 0; i < len(websites); i++ {
 		resChan := <-resultOfChannels
-		if resChan.err != " " {
+		if resChan.err != "null" {
 			fmt.Println("Error pinging site:", resChan.website.URL, resChan.err)
-			anyError = true
+			// anyError = true
 			// continue
 		}
 
@@ -122,14 +135,9 @@ func AddSiteLogs(ctx *gin.Context) {
 			return
 		}
 
-		if anyError {
-			ctx.JSON(http.StatusAccepted, gin.H{
-				"message": "Site logs added with some errors",
-			})
-		} else {
-			ctx.JSON(http.StatusAccepted, gin.H{
-				"message": "Site logs added",
-			})
-		}
 	}
+
+	ctx.JSON(http.StatusAccepted, gin.H{
+		"message": "Site logs added",
+	})
 }

@@ -18,14 +18,14 @@ func GetLatency(url string) (string, string, string) {
 	ping := time.Since(startTime)
 
 	if response != nil {
-
+		defer response.Body.Close()
 		if err != nil {
 			fmt.Println("error is :", err.Error())
 			return ping.String(), response.Status, err.Error()
 		}
 
 		fmt.Println("time taken: ", ping)
-		defer response.Body.Close()
+		
 
 		//	return string(readableString), nil
 		return ping.String(), response.Status, "null"

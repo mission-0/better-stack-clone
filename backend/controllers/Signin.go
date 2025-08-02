@@ -42,12 +42,15 @@ func SignInController(ctx *gin.Context) {
 		ID: user.ID,
 	}
 
+	fmt.Println("newUser", newUser)
 	result := utilities.DB.First(&newUser)
+	fmt.Println("result", result)
 
 	if result.Error != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error getting user",
 		})
+		return
 	}
 
 	isCorrectPassword := checkUserPasswordWithHash(newUser.Password, user.Password)
@@ -57,7 +60,6 @@ func SignInController(ctx *gin.Context) {
 			"message": "Incorrect Password",
 		})
 		return
-
 	}
 
 	jwtToken, err := createToken(newUser.ID)
