@@ -13,8 +13,8 @@ func init() {
 	fmt.Println("Init called")
 	utilities.LoadEnvVaribales()
 	utilities.ConnectToDb()
-	// utilities.MigrateDB()
-	utilities.ConnectToRedis()
+	utilities.MigrateDB()
+	// utilities.ConnectToRedis()
 }
 
 func main() {

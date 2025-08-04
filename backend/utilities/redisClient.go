@@ -19,7 +19,4 @@ func ConnectToRedis() {
 	RedisClient = redis.NewClient(opt)
 	fmt.Println("Redis client connected", RedisClient)
 
-	// RedisClient.Set(RedisContext, "foo", "bar", 0)
-	// val := RedisClient.Get(RedisContext, "foo").Val()
-	// print(val)
 }

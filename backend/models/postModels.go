@@ -25,13 +25,14 @@ type Website struct {
 }
 
 type Logs struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Latency   string    `json:"latency"`
-	WebsiteID uuid.UUID `gorm:"type:uuid;notNull;index" json:"websiteID" validate:"-"`
-	Website   Website   `gorm:"foreignKey:WebsiteID;references:ID" json:"website" validate:"-"`
-	Logs      string    `json:"logs" validate:"required,logs"`
-	Error     string    `json:"err" validate:"-"`
-	Time      time.Time
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	Latency     string    `json:"latency"`
+	WebsiteID   uuid.UUID `gorm:"type:uuid;notNull;index" json:"websiteID" validate:"-"`
+	IsWebsiteUp bool      `json:"isWebsiteUp"`
+	Website     Website   `gorm:"foreignKey:WebsiteID;references:ID" json:"website" validate:"-"`
+	Logs        string    `json:"logs" validate:"required,logs"`
+	Error       string    `json:"err" validate:"-"`
+	Time        time.Time
 }
 
 type RegionList string

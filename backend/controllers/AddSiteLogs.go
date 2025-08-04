@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,10 +15,11 @@ import (
 )
 
 type logResult struct {
-	latency string
-	status  string
-	err     string
-	website models.Website
+	latency     string
+	status      string
+	err         string
+	website     models.Website
+	isWebsiteUp bool
 }
 
 func AddSiteLogs(ctx *gin.Context) {
@@ -74,32 +74,32 @@ func AddSiteLogs(ctx *gin.Context) {
 	resultOfChannels := make(chan logResult, len(websites))
 
 	//serialising websites to valid json format before storing or Redis
-	jsonSerialisation, jsonErr := json.Marshal(websites)
-	if jsonErr != nil {
-		fmt.Println("error serialising json")
+	// jsonSerialisation, jsonErr := json.Marshal(websites)
+	// if jsonErr != nil {
+	// 	fmt.Println("error serialising json")
 
-	}
+	// }
 
 	for _, website := range websites {
 		go func(w models.Website) {
 
 			fmt.Println("website before marshelling", website.User)
 
-			redisErr := utilities.RedisClient.Set(utilities.RedisContext, "websites"+"-"+w.User.Email, jsonSerialisation, 0)
+			// redisErr := utilities.RedisClient.Set(utilities.RedisContext, "websites"+"-"+w.User.Email, jsonSerialisation, 0)
 
-			fmt.Println("rediserr:", redisErr)
-			latency, status, err := pingsites.GetLatency(w.URL)
+			// fmt.Println("rediserr:", redisErr)
+			latency, status, err, websiteStatus := pingsites.GetLatency(w.URL)
+			// fmt.Println("Latency from fn", latency, "status:", status, "err", err,"websiteStatus", websiteStatus)
 			resultOfChannels <- logResult{
-				latency: latency,
-				status:  status,
-				err:     err,
-				website: w,
+				latency:     latency,
+				status:      status,
+				err:         err,
+				website:     w,
+				isWebsiteUp: websiteStatus,
 			}
 
 		}(website)
 	}
-
-	// var anyError bool
 
 	for i := 0; i < len(websites); i++ {
 		resChan := <-resultOfChannels
@@ -109,12 +109,14 @@ func AddSiteLogs(ctx *gin.Context) {
 			// continue
 		}
 
+		fmt.Println("Latency from fn", resChan.latency, "status:", resChan.status, "err", resChan.err, "websiteStatus", resChan.isWebsiteUp)
 		newWebsiteLogs := models.Logs{
-			Logs:      resChan.status,
-			WebsiteID: resChan.website.ID,
-			Latency:   resChan.latency,
-			Error:     resChan.err,
-			Time:      time.Now(),
+			Logs:        resChan.status,
+			WebsiteID:   resChan.website.ID,
+			Latency:     resChan.latency,
+			Error:       resChan.err,
+			Time:        time.Now(),
+			IsWebsiteUp: resChan.isWebsiteUp,
 		}
 		res := utilities.DB.Create(&newWebsiteLogs)
 
