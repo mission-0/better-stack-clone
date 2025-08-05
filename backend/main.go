@@ -13,7 +13,7 @@ func init() {
 	fmt.Println("Init called")
 	utilities.LoadEnvVaribales()
 	utilities.ConnectToDb()
-	utilities.MigrateDB()
+	// utilities.MigrateDB()
 	// utilities.ConnectToRedis()
 }
 
@@ -32,7 +32,7 @@ func main() {
 	router.POST("/signin", controllers.SignInController)
 	router.GET("/mysites", middlewares.Usermiddleware(), controllers.AllSites)
 	router.POST("/newsite", middlewares.Usermiddleware(), controllers.AddNewSiteController)
-	router.GET("/logs", middlewares.Usermiddleware(), controllers.AddSiteLogs)
+	router.GET("/logs", middlewares.Usermiddleware(), controllers.SiteLogs)
 
 	router.Run()
 }
