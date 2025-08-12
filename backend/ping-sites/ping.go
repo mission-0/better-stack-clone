@@ -1,7 +1,3 @@
-/*
-this package is used for checking the latency of the sites
-*/
-
 package pingsites
 
 import (
@@ -19,7 +15,6 @@ func GetLatency(url string) (string, string, string, bool) {
 
 	if response != nil {
 		defer response.Body.Close()
-		
 
 		if err != nil {
 			fmt.Println("error is :", err.Error())

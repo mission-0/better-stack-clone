@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/mission-0/better-stack-backend/controllers"
 	"github.com/mission-0/better-stack-backend/middlewares"
@@ -19,14 +20,18 @@ func init() {
 
 func main() {
 	fmt.Println("Hello from go lang backend")
-	// currentTime, status, err := pingsites.GetLatency("https://jsonplaceholder.typicode.com/todos/")
-	// if err != nil {
-	// 	fmt.Println("error come")
-	// }
-	// fmt.Println("status: ", status)
-	// fmt.Println("time is", currentTime)
 
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  false,
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "UPDATE"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+	
 	router.GET("/health", middlewares.Usermiddleware(), controllers.HealthCheckup)
 	router.POST("/signup", controllers.SignUpController)
 	router.POST("/signin", controllers.SignInController)

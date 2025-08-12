@@ -3,6 +3,7 @@ module github.com/mission-0/better-stack-backend
 go 1.24.2
 
 require (
+	github.com/gin-contrib/cors v1.7.6
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/robfig/cron v1.2.0
 	gorm.io/driver/postgres v1.6.0
