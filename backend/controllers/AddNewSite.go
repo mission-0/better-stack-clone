@@ -58,9 +58,10 @@ func AddNewSiteController(ctx *gin.Context) {
 	}
 
 	registerNewSite := models.Website{
-		URL:     newSite.URL,
-		Regions: newSite.Regions,
-		UserID:  userID,
+		URL:          newSite.URL,
+		Regions:      newSite.Regions,
+		PingInterval: newSite.PingInterval,
+		UserID:       userID,
 	}
 
 	res := utilities.DB.Create(&registerNewSite)
