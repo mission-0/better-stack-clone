@@ -32,7 +32,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 	
-	router.GET("/health", middlewares.Usermiddleware(), controllers.HealthCheckup)
+	router.GET("/health",  controllers.HealthCheckup)
 	router.POST("/signup", controllers.SignUpController)
 	router.POST("/signin", controllers.SignInController)
 	router.GET("/mysites", middlewares.Usermiddleware(), controllers.AllSites)

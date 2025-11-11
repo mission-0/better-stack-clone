@@ -34,44 +34,42 @@ func createToken(userId uuid.UUID) (string, error) {
 }
 
 func SignInController(ctx *gin.Context) {
-	var user models.User
+	var loginRequest models.User
 
-	ctx.ShouldBindJSON(&user)
-
-	newUser := models.User{
-		ID: user.ID,
-	}
-
-	fmt.Println("newUser", newUser)
-	result := utilities.DB.First(&newUser)
-	fmt.Println("result", result)
-
-	if result.Error != nil {
+	if err := ctx.ShouldBindJSON(&loginRequest); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error getting user",
+			"message": "Invalid JSON",
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	isCorrectPassword := checkUserPasswordWithHash(newUser.Password, user.Password)
-
-	if !isCorrectPassword {
-		ctx.JSON(http.StatusNotAcceptable, gin.H{
-			"message": "Incorrect Password",
+	var storedUser models.User
+	result := utilities.DB.Where("email = ?", loginRequest.Email).First(&storedUser)
+	if result.Error != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User not found",
 		})
 		return
 	}
 
-	jwtToken, err := createToken(newUser.ID)
+	if !checkUserPasswordWithHash(storedUser.Password, loginRequest.Password) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Incorrect password",
+		})
+		return
+	}
+
+	jwtToken, err := createToken(storedUser.ID)
 	if err != nil {
 		fmt.Println("JWt err", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message:": "Bad jwt call",
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to create token",
 		})
 		return
 	}
-	ctx.JSON(200, gin.H{
-		"message": " Signin route",
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Signin successful",
 		"JWT":     jwtToken,
 	})
 }
